@@ -92,7 +92,7 @@ const HomePage = () => {
       <section className="relative z-10 px-4 md:px-16 lg:px-28 pb-12 pt-4">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
           <Link
-            to="/foodDelivery"
+            to="/cartalog"
             className="col-span-2 md:col-span-1 bg-white rounded-3xl p-6 shadow-xl relative overflow-hidden min-h-[220px] group hover:shadow-2xl transition-shadow"
           >
             <h2 className="text-xl md:text-2xl font-extrabold text-gray-900">

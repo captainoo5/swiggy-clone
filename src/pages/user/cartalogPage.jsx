@@ -46,18 +46,18 @@ export default function CatalogPage() {
               <span className="text-zinc-500 font-medium hover:text-orange-500 transition-colors cursor-pointer">Offers</span>
               <span className="text-zinc-500 font-medium hover:text-orange-500 transition-colors cursor-pointer">Dineout</span>
             </div>
-            <div className="flex items-center gap-3">
-              <button onClick={() => navigate("/cart")} className="active:scale-90 transition-transform">
-                <span className="material-symbols-outlined text-[#2d2f2f] text-2xl">shopping_bag</span>
+            <div className="flex items-center gap-4">
+              <button className="scale-95 active:scale-90 transition-transform">
+                <span className="material-symbols-outlined text-on-surface text-2xl">shopping_bag</span>
               </button>
-              <button className="active:scale-90 transition-transform">
-                <span className="material-symbols-outlined text-[#2d2f2f] text-2xl">account_circle</span>
+              <button className="scale-95 active:scale-90 transition-transform">
+                <span className="material-symbols-outlined text-on-surface text-2xl">account_circle</span>
               </button>
             </div>
           </nav>
         </div>
       </header>
-
+      
       <main className="pt-24 pb-24 max-w-screen-2xl mx-auto px-8">
         {/* Filters */}
         <section className="sticky top-20 z-40 py-6 bg-[#f6f6f6]">

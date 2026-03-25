@@ -1,7 +1,46 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { saveAuth } from "../../utilitis/authServices";
 
 const AdminLoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (!email || !password) {
+      setErrorMsg("Please provide email and password");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setErrorMsg("");
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`, {
+        email,
+        password,
+      });
+
+      if (response.data.success) {
+        const { token, user } = response.data.data;
+        if (user.role === "admin") {
+          saveAuth(token, user);
+          navigate("/admin/dashboard/home");
+        } else {
+          setErrorMsg("Access Denied: You are not an admin.");
+        }
+      }
+    } catch (error) {
+      setErrorMsg(error.response?.data?.message || "An error occurred during login");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white min-h-screen flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
@@ -36,8 +75,14 @@ const AdminLoginPage = () => {
             </p>
           </header>
 
+          {errorMsg && (
+            <div className="mb-4 p-3 bg-red-100 text-red-600 rounded text-sm">
+              {errorMsg}
+            </div>
+          )}
+
           {/* Form */}
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleLogin}>
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-gray-400 ml-1 tracking-wider uppercase">
                 Admin Email
@@ -46,6 +91,9 @@ const AdminLoginPage = () => {
                 className="w-full bg-white border border-gray-300 rounded-lg py-3.5 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/30 focus:border-[#FF5200]/50 focus:outline-none transition-all font-medium text-sm"
                 placeholder="admin@swiggy.com"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
 
@@ -58,6 +106,9 @@ const AdminLoginPage = () => {
                   className="w-full bg-white border border-gray-300 rounded-lg py-3.5 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/30 focus:border-[#FF5200]/50 focus:outline-none transition-all font-medium text-sm pr-12"
                   placeholder="••••••••••"
                   type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
                 <button
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
@@ -82,8 +133,9 @@ const AdminLoginPage = () => {
               <button
                 className="w-full bg-[#FF5200] text-white font-extrabold py-3.5 rounded-lg shadow-[0_8px_20px_-4px_rgba(255,82,0,0.4)] hover:shadow-[0_12px_28px_-4px_rgba(255,82,0,0.5)] hover:scale-[1.01] active:scale-[0.97] transition-all duration-200 cursor-pointer text-sm"
                 type="submit"
+                disabled={loading}
               >
-                Access Dashboard
+                {loading ? "Authenticating..." : "Access Dashboard"}
               </button>
             </div>
           </form>

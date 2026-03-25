@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const LoginPage = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = () => {};
+
   return (
     <div className="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
       <main className="flex-grow flex items-center justify-center px-6 py-12 relative overflow-hidden">
@@ -56,6 +62,7 @@ const LoginPage = () => {
                   id="email"
                   placeholder="name@example.com"
                   type="email"
+                  value={email}
                 />
               </div>
               <div>
@@ -79,6 +86,7 @@ const LoginPage = () => {
                     id="password"
                     placeholder="••••••••"
                     type="password"
+                    value={password}
                   />
                   <button
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"

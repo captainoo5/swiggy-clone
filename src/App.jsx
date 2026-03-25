@@ -22,7 +22,7 @@ import AdminAnalytics from './pages/admin/dashboard/adminAnalytics';
 import CartalogPage from './pages/user/cartalogPage';
 import CartPage from './pages/cartPage';
 import PreviewPage from './pages/user/previewPage';
-
+import AdminProtectedRoute from './pages/admin/adminProtectedRouted';
 
 const router = createBrowserRouter(createRoutesFromElements(
     <>
@@ -35,6 +35,7 @@ const router = createBrowserRouter(createRoutesFromElements(
         <Route path="signup" element={<Signup />} />
     </Route>
     <Route path="/admin" element={<AdminLoginPage />} />
+    <Route element={<AdminProtectedRoute />}>
     <Route path="/admin/dashboard" element={<AdminLayout />}>
         <Route path="home" element={<AdminDashboard />} />
         <Route path="foodManagement" element={<AdminFoodManagement />} />
@@ -43,6 +44,9 @@ const router = createBrowserRouter(createRoutesFromElements(
         <Route path="users" element={<AdminUsers />} />
         <Route path="analytics" element={<AdminAnalytics />} />
     </Route>
+    
+    </Route>
+    
     <Route path="/cartalog" element={<CartalogPage />}/>
     <Route path="/preview" element={<PreviewPage />} />
     <Route path="/cart" element={<CartPage />} />

@@ -1,88 +1,42 @@
-import { useState } from "react";
-
-const foodItems = [
-  {
-    name: "Paneer Butter Masala",
-    restaurant: "Punjabi Dhaba Express",
-    location: "South Delhi, Zone A",
-    price: "₹249.00",
-    type: "Veg",
-    typeColor: "text-orange-600",
-    status: "ACTIVE",
-    statusStyle: "bg-green-100 text-green-700",
-    dotColor: "bg-green-600",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDxNTJVsalgE-OHqgIXEJhOIYaV18ESSNGpBe6AQt_Rv32vib8u8TXJy99lcqf2DdSMRh2OGbY_u1bFf5nZCrbosM4QiJUR_hk0xzlsFEsqDuuW_yXSGBZzhFBjivtnfXYL3sFLRvmK6HMyc3BZND6usFHjdAOPWb-pPfJlpCOTz9FppSBGA2fYCa1p6PXXVjBd3D48CNQY354sVQdXzp1bYqX0AmxlMIWJFTAIRqAYANP5DHXyWFkg_lcSvKJQgmjfaUlBiDyQv1A",
-  },
-  {
-    name: "Chicken Hakka Noodles",
-    restaurant: "The Wok Republic",
-    location: "Indiranagar, Zone B2",
-    price: "₹320.00",
-    type: "Non-Veg",
-    typeColor: "text-red-600",
-    status: "ACTIVE",
-    statusStyle: "bg-green-100 text-green-700",
-    dotColor: "bg-green-600",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAdPXi1b5Tetq9aK_J1pg86VYmSaA-KpQ12_6yoxIsWTdAgiZ6hww2AkcACHivx65RsLxzVDvoXy7Uao_BwtBFJKb0QIuarDIAzFYe6sniwOHBz6bOGVlD4FRcpAhuiT3Jhb3JY1S4IZW6sw0wj31IkkCBlTIYTyfQkccHvgjqSBEz8UWfV2qZgfPE8Ed7kcUmY5oC-RGpjKkTxJCTKaLUnbYJCooWD83rTBtF_EDvZKMcSircduLjT5rwcGUzi1ts87N9ywSSWSJs",
-  },
-  {
-    name: 'Classic Margherita 12"',
-    restaurant: "Little Italy Authentic",
-    location: "Bandra West, Zone 5",
-    price: "₹549.00",
-    type: "Veg",
-    typeColor: "text-orange-600",
-    status: "INACTIVE",
-    statusStyle: "bg-slate-100 text-slate-500",
-    dotColor: "bg-slate-400",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDDl-KyeDaTIsyHA46JmNMqulQL8jTqLf5BnNoFDctx2padhK5vOQuynzLgy7MLpsJZqyBpwl_aqHITSFmsGr3x1nXO3Awts7BoMxSy0TMNmfl0B4Z42tlJdK-v232y0CLi2qFDjmoe9BsCTbXwlrMvJbbxZ96zZkDa6in_yNNHFBfDqvRuO2qAESNCpxDgtMWd9QfbtWbKq41FKKpEOgWL-9wPNaOkDn5eDPHVpl3yNwj3vAzYOh_5MuLuFHbC-ZOM8JdM9oHgz-I",
-  },
-  {
-    name: "Murgh Makhani (Full)",
-    restaurant: "Moti Mahal Delux",
-    location: "Cyber Hub, Zone G",
-    price: "₹680.00",
-    type: "Non-Veg",
-    typeColor: "text-red-600",
-    status: "ACTIVE",
-    statusStyle: "bg-green-100 text-green-700",
-    dotColor: "bg-green-600",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuB47P10VqbBgcMZ1gTkGJnE2RnA-1dVVHoirUQ291eNnyMdljFPLYgmTa9EIZhJIF5mMAwoLjOne80pb8Lr4tK0v3YLmJUmwJgp2E5pWq4bU5lBkFu-xMaSeTXMnGvQvTn5uIT_QbUvu9FZ4v1ZbpUOsu0_b8qJTJMrxf37cpDVHALYGA78wprYbl27Ps8Fnno_Poov2RdVbhN_3ibCN6z0WYERPa4EqlFJ6vFGCNC47bWFGKWnNvFxl3YR_VrbXu4Zj5nwTpz0a_Y",
-  },
-  {
-    name: "Vegetable Dimsums (8pcs)",
-    restaurant: "Mainland China",
-    location: "Powai, Zone P1",
-    price: "₹385.00",
-    type: "Veg",
-    typeColor: "text-orange-600",
-    status: "ACTIVE",
-    statusStyle: "bg-green-100 text-green-700",
-    dotColor: "bg-green-600",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBzoQNwR1zsb0FK7XHgjJCr_tTDe3ZJepN-jbWMJNC1M2alSBsuJYpIn31a9QP656wnNwEB4UXoSbbyXOptSZX0XfQS6ixt57mFUzIUcOnNhs1C2cXT5hnNClkGpOHrom_AVh1H6rf_zC-0njfZPMMaFkFg9mm_7SlEPBWtFWz1-MZksOiOJ8LgwUOeXf25tSPfhuKUbZEQlCOlU_m4-03Q4YEfLEQhdARYBuHH6ucd_nSvLUjf5DPiJlKgQj58oY_7-6Qphuocuws",
-  },
-  {
-    name: "Fettuccine Alfredo",
-    restaurant: "Pasta Fresca",
-    location: "Hitech City, Zone H4",
-    price: "₹410.00",
-    type: "Veg",
-    typeColor: "text-orange-600",
-    status: "ACTIVE",
-    statusStyle: "bg-green-100 text-green-700",
-    dotColor: "bg-green-600",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDpLkqm5yxK4s0_f_HIOCAkq1TbvIz6dIRg5CB3SdMXGvaxPHiT8eFXN3GN9MCe26BYlAAuF30IvQK1dfqf-3Uyt6JkdCYMymj80BMblmtVI3uR3mSxZG5eNvEX7sI0JKgYMDgTQTUXSmxKkGOerBoVMHp87fA1cV9xbjPV90BPVsaTYuVjpeDqwwtki0wgg6_kuewcbG-9M5GDfJ9uG-So0n0KorsbmEetZU8p6brfKMdVtbb2NttNNrSF6De-O6lkiNITpacaq9Q",
-  },
-];
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const AdminFoodManagement = () => {
   const [activeFilter, setActiveFilter] = useState("All Items");
   const [showModal, setShowModal] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [formData, setFormData] = useState({
+    name: "", restaurant: "", price: "", location: "", category: "", foodtype: "Veg", description: "", status: "Active"
+  });
+  const [foodItems, setFoodItems] = useState([]);
+
+  const fetchProducts = async () => {
+    try {
+      const token = localStorage.getItem("token") || "";
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/get-all-products`, {
+        headers: { "Authorization": token }
+      });
+      if (response.data.success) {
+        setFoodItems(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to load products", "error");
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     }
   };
@@ -91,9 +45,60 @@ const AdminFoodManagement = () => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith("image/")) {
+      setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     }
   };
+
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+        setToast((prev) => ({ ...prev, show: false }));
+    }, 3500);
+  };
+
+  const handleAddFood = async (e) => {
+    e.preventDefault();
+    if (!imageFile || !formData.name || !formData.price || !formData.description) {
+        setErrorMsg("Please fill all required fields and upload an image.");
+        return;
+    }
+    setLoading(true); setErrorMsg("");
+    try {
+        const reader = new FileReader();
+        reader.readAsDataURL(imageFile);
+        reader.onloadend = async () => {
+            try {
+                const base64Image = reader.result;
+                const payload = { ...formData, image: base64Image };
+                const token = localStorage.getItem("token") || "";
+                
+                const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/add-product`, payload, {
+                    headers: { "Authorization": token }
+                });
+                if (response.data.success) {
+                    setShowModal(false);
+                    setFormData({name: "", restaurant: "", price: "", location: "", category: "", foodtype: "Veg", description: "", status: "Active"});
+                    setImageFile(null); 
+                    setImagePreview(null);
+                    setLoading(false);
+                    showToast("Food added successfully!", "success");
+                    fetchProducts();
+                }
+            } catch (err) {
+                const msg = err.response?.data?.message || "Failed to add food";
+                setErrorMsg(msg);
+                setLoading(false);
+                showToast(msg, "error");
+            }
+        };
+    } catch (error) {
+        setErrorMsg("Failed to add food");  
+        setLoading(false);
+        showToast("Failed to add food", "error");
+    }
+  };
+
 
   return (
     <div className="px-4 md:px-8 py-6 md:py-8 min-h-screen">
@@ -161,20 +166,20 @@ const AdminFoodManagement = () => {
       {/* Food Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {foodItems.map((item) => (
-          <div key={item.name} className="group bg-white rounded-2xl p-4 flex gap-4 md:gap-5 hover:scale-[1.02] transition-all cursor-pointer shadow-sm">
+          <div key={item._id} className="group bg-white rounded-2xl p-4 flex gap-4 md:gap-5 hover:scale-[1.02] transition-all cursor-pointer shadow-sm">
             <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden shrink-0 relative">
               <img className="w-full h-full object-cover" alt={item.name} src={item.image} />
-              <div className={`absolute top-2 left-2 px-2 py-0.5 bg-white/90 backdrop-blur-sm rounded text-[10px] font-black uppercase ${item.typeColor}`}>
-                {item.type}
+              <div className={`absolute top-2 left-2 px-2 py-0.5 bg-white/90 backdrop-blur-sm rounded text-[10px] font-black uppercase ${item.foodtype === 'Veg' ? 'text-green-600' : 'text-red-600'}`}>
+                {item.foodtype}
               </div>
             </div>
             <div className="flex flex-col justify-between flex-1 py-1 min-w-0">
               <div>
                 <div className="flex justify-between items-start gap-2">
                   <h3 className="font-bold text-base md:text-lg leading-tight truncate">{item.name}</h3>
-                  <span className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${item.statusStyle}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${item.dotColor}`}></span>
-                    {item.status}
+                  <span className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${item.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'Active' ? 'bg-green-600' : 'bg-slate-400'}`}></span>
+                    {item.status || "Active"}
                   </span>
                 </div>
                 <p className="text-xs text-gray-500 font-medium mt-1">{item.restaurant}</p>
@@ -187,7 +192,7 @@ const AdminFoodManagement = () => {
                 </div>
               </div>
               <div className="flex justify-between items-center mt-2">
-                <span className="text-lg font-black text-gray-900">{item.price}</span>
+                <span className="text-lg font-black text-gray-900">₹{item.price}</span>
                 <div className="flex gap-2">
                   <button className="p-1.5 rounded-lg bg-gray-100 text-slate-500 hover:bg-orange-50 hover:text-[#FF5200] transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -243,6 +248,27 @@ const AdminFoodManagement = () => {
         </div>
       </footer>
 
+      {/* Toast Notification */}
+      {toast.show && (
+          <div style={{ zIndex: 9999, borderColor: toast.type === "success" ? "#22c55e" : "#ef4444", zIndex: 9999 }} className="fixed bottom-10 right-10 px-6 py-5 rounded-xl shadow-2xl bg-white flex items-center gap-4 transform transition-all border-l-4" >
+              {toast.type === "success" ? (
+                  <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                  </div>
+              ) : (
+                  <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </div>
+              )}
+              <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest mb-0.5" style={{ color: toast.type === "success" ? "#22c55e" : "#ef4444" }}>
+                      {toast.type === "success" ? "Success" : "Error"}
+                  </p>
+                  <p className="font-bold text-sm text-gray-800">{toast.message}</p>
+              </div>
+          </div>
+      )}
+
       {/* Add New Food Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
@@ -261,7 +287,8 @@ const AdminFoodManagement = () => {
             </div>
 
             {/* Modal Body */}
-            <form className="p-6 space-y-6">
+            {errorMsg && <div className="px-6 pt-4 text-red-500 text-sm font-bold">{errorMsg}</div>}
+            <form className="p-6 space-y-6" onSubmit={handleAddFood}>
               {/* Image Upload */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Food Image</label>
@@ -303,11 +330,11 @@ const AdminFoodManagement = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Food Name</label>
-                  <input type="text" placeholder="e.g. Paneer Butter Masala" className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm" />
+                  <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="e.g. Paneer Butter Masala" className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Restaurant</label>
-                  <input type="text" placeholder="e.g. Punjabi Dhaba Express" className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm" />
+                  <input type="text" value={formData.restaurant} onChange={(e) => setFormData({...formData, restaurant: e.target.value})} placeholder="e.g. Punjabi Dhaba Express" className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm" />
                 </div>
               </div>
 
@@ -315,11 +342,11 @@ const AdminFoodManagement = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Price (₹)</label>
-                  <input type="number" placeholder="249.00" className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm" />
+                  <input type="number" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} placeholder="249.00" className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Location / Zone</label>
-                  <input type="text" placeholder="e.g. South Delhi, Zone A" className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm" />
+                  <input type="text" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} placeholder="e.g. South Delhi, Zone A" className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm" />
                 </div>
               </div>
 
@@ -327,7 +354,7 @@ const AdminFoodManagement = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Category</label>
-                  <select className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-700 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm">
+                  <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-700 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm">
                     <option value="">Select cuisine</option>
                     <option>North Indian</option>
                     <option>South Indian</option>
@@ -342,19 +369,19 @@ const AdminFoodManagement = () => {
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Food Type</label>
                   <div className="flex gap-4 mt-1">
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="radio" name="foodType" value="Veg" defaultChecked className="w-4 h-4 accent-green-600" />
+                      <input type="radio" name="foodType" value="Veg" checked={formData.foodtype === "Veg"} onChange={(e) => setFormData({...formData, foodtype: e.target.value})} className="w-4 h-4 accent-green-600" />
                       <span className="flex items-center gap-1.5">
                         <span className="w-4 h-4 border-2 border-green-600 rounded-sm flex items-center justify-center">
-                          <span className="w-2 h-2 bg-green-600 rounded-full"></span>
+                          {formData.foodtype === "Veg" && <span className="w-2 h-2 bg-green-600 rounded-full"></span>}
                         </span>
                         <span className="text-sm font-semibold text-gray-700">Veg</span>
                       </span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="radio" name="foodType" value="Non-Veg" className="w-4 h-4 accent-red-600" />
+                      <input type="radio" name="foodType" value="Non-Veg" checked={formData.foodtype === "Non-Veg"} onChange={(e) => setFormData({...formData, foodtype: e.target.value})} className="w-4 h-4 accent-red-600" />
                       <span className="flex items-center gap-1.5">
                         <span className="w-4 h-4 border-2 border-red-600 rounded-sm flex items-center justify-center">
-                          <span className="w-2 h-2 bg-red-600 rounded-full"></span>
+                          {formData.foodtype === "Non-Veg" && <span className="w-2 h-2 bg-red-600 rounded-full"></span>}
                         </span>
                         <span className="text-sm font-semibold text-gray-700">Non-Veg</span>
                       </span>
@@ -366,7 +393,7 @@ const AdminFoodManagement = () => {
               {/* Description */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Description</label>
-                <textarea rows="3" placeholder="Brief description of the food item..." className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm resize-none"></textarea>
+                <textarea rows="3" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Brief description of the food item..." className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm resize-none"></textarea>
               </div>
 
               {/* Status Toggle */}
@@ -376,7 +403,7 @@ const AdminFoodManagement = () => {
                   <p className="text-xs text-gray-400">Make this item visible to customers</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" defaultChecked className="sr-only peer" />
+                  <input type="checkbox" checked={formData.status === "Active"} onChange={(e) => setFormData({...formData, status: e.target.checked ? "Active" : "Inactive"})} className="sr-only peer" />
                   <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF5200]"></div>
                 </label>
               </div>
@@ -386,8 +413,8 @@ const AdminFoodManagement = () => {
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-3 border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors text-sm">
                   Cancel
                 </button>
-                <button type="submit" className="flex-1 py-3 bg-[#FF5200] text-white font-bold rounded-xl shadow-lg shadow-[#FF5200]/20 hover:scale-[1.02] active:scale-95 transition-all text-sm">
-                  Add Food Item
+                <button type="submit" disabled={loading} className="flex-1 py-3 bg-[#FF5200] text-white font-bold rounded-xl shadow-lg shadow-[#FF5200]/20 hover:scale-[1.02] active:scale-95 transition-all text-sm disabled:opacity-70">
+                  {loading ? "Adding Food..." : "Add Food Item"}
                 </button>
               </div>
             </form>

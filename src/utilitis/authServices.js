@@ -14,6 +14,7 @@ export const saveUserAuth = (token, user) =>{
 export const logout = () =>{
     localStorage.removeItem("token");
     localStorage.removeItem("admin");
+    localStorage.removeItem("user");
 }
 
 

@@ -71,7 +71,7 @@ const AdminLoginPage = () => {
               Admin Sign In
             </h1>
             <p className="text-gray-500 text-sm">
-              Restricted access — authorized personnel only
+              Restricted access - authorized personnel only
             </p>
           </header>
 

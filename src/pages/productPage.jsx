@@ -1,6 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+
+import northIndianIcon from '../assets/images/categories/north_indian.png';
+import biryaniIcon from '../assets/images/categories/biryani.png';
+import chineseIcon from '../assets/images/categories/chinese.png';
+import burgerIcon from '../assets/images/categories/burger.png';
+import pizzaIcon from '../assets/images/categories/pizza.png';
+import dessertIcon from '../assets/images/categories/dessert.png';
+import veggiesIcon from '../assets/images/categories/vegetables.png';
+import fruitsIcon from '../assets/images/categories/fruits.png';
+
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -41,34 +50,33 @@ const ProductPage = () => {
   };
   // Static images for standard food categories (placeholders for now)
   const categoryImages = {
-    'North Indian': 'https://res.cloudinary.com/ddcz1as57/image/upload/v1740634676/category_north_indian.png', // Example Cloudinary URLs or generic ones
-    'Chinese': 'https://res.cloudinary.com/ddcz1as57/image/upload/v1740634676/category_chinese.png',
-    'South Indian': 'https://res.cloudinary.com/ddcz1as57/image/upload/v1740634676/category_south_indian.png',
-    'Desserts': 'https://res.cloudinary.com/ddcz1as57/image/upload/v1740634676/category_desserts.png',
-    // Default fallback
-    'default': 'https://via.placeholder.com/150?text=Food'
+    'North Indian': northIndianIcon,
+    'Chinese': chineseIcon,
+    'South Indian': northIndianIcon, // Fallback
+    'Desserts': dessertIcon,
+    'default': northIndianIcon
   };
-  // Standard Swiggy Categories for the top carousel if DB is empty or for variety
+  // Standard Categories for the top carousel
   const topFoodCategories = [
-    { name: 'North Indian', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029851/PC_Creative%20refresh/3D_folders/food/North_Indian.png' },
-    { name: 'Biryani', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029845/PC_Creative%20refresh/3D_folders/food/Biryani.png' },
-    { name: 'Chinese', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029848/PC_Creative%20refresh/3D_folders/food/Chinese.png' },
-    { name: 'Burgers', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029845/PC_Creative%20refresh/3D_folders/food/Burger.png' },
-    { name: 'Pizza', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029856/PC_Creative%20refresh/3D_folders/food/Pizza.png' },
-    { name: 'Desserts', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029851/PC_Creative%20refresh/3D_folders/food/Cakes.png' },
-    { name: 'Noodles', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029855/PC_Creative%20refresh/3D_folders/food/Noodles.png' },
-    { name: 'Pasta', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029854/PC_Creative%20refresh/3D_folders/food/Pasta.png' },
-    { name: 'Salad', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029859/PC_Creative%20refresh/3D_folders/food/Salad.png' },
-    { name: 'Shawarma', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029859/PC_Creative%20refresh/3D_folders/food/Shawarma.png' },
+    { name: 'North Indian', img: northIndianIcon },
+    { name: 'Biryani', img: biryaniIcon },
+    { name: 'Chinese', img: chineseIcon },
+    { name: 'Burgers', img: burgerIcon },
+    { name: 'Pizza', img: pizzaIcon },
+    { name: 'Desserts', img: dessertIcon },
+    { name: 'Noodles', img: chineseIcon },
+    { name: 'Pasta', img: chineseIcon },
+    { name: 'Salad', img: veggiesIcon },
+    { name: 'Shawarma', img: northIndianIcon },
   ];
   const instamartCategories = [
-    { name: 'Fresh Vegetables', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_200,h_200/v1674029860/PC_Creative%20refresh/3D_folders/instamart/Fresh_Vegetables.png' },
-    { name: 'Fresh Fruits', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_200,h_200/v1674029858/PC_Creative%20refresh/3D_folders/instamart/Fresh_Fruits.png' },
-    { name: 'Dairy & Eggs', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_200,h_200/v1674029850/PC_Creative%20refresh/3D_folders/instamart/Dairy_Bread_and_Eggs.png' },
-    { name: 'Snacks', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_200,h_200/v1674029861/PC_Creative%20refresh/3D_folders/instamart/Munchies.png' },
-    { name: 'Beverages', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_200,h_200/v1674029849/PC_Creative%20refresh/3D_folders/instamart/Cold_Drinks_and_Juices.png' },
-    { name: 'Atta & Dals', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_200,h_200/v1674029858/PC_Creative%20refresh/3D_folders/instamart/Rice_Atta_and_Dals.png' },
-    { name: 'Cleaning', img: 'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_200,h_200/v1674029849/PC_Creative%20refresh/3D_folders/instamart/Cleaning_Essentials.png' },
+    { name: 'Fresh Vegetables', img: veggiesIcon },
+    { name: 'Fresh Fruits', img: fruitsIcon },
+    { name: 'Dairy & Eggs', img: veggiesIcon },
+    { name: 'Snacks', img: fruitsIcon },
+    { name: 'Beverages', img: fruitsIcon },
+    { name: 'Atta & Dals', img: veggiesIcon },
+    { name: 'Cleaning', img: veggiesIcon },
   ];
   if (loading) {
     return (

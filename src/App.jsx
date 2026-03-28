@@ -9,7 +9,6 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import PartnersPage from './pages/Partners';
 import LoginPage from './pages/auth/loginPage';
-import FoodDelivery from './pages/foodDelivery';
 import Signup from './pages/auth/signup';
 import AdminLoginPage from './pages/auth/adminLoginPage';
 import AdminLayout from './pages/admin/dashboard/AdminLayout';
@@ -22,7 +21,12 @@ import AdminAnalytics from './pages/admin/dashboard/adminAnalytics';
 import CartalogPage from './pages/user/cartalogPage';
 import CartPage from './pages/cartPage';
 import PreviewPage from './pages/user/previewPage';
+import OrderPage from './pages/user/orderPage';
+import DineoutPage from './pages/dineOut';
+import InstamartPage from './pages/instamart';
+import ProductPage from './pages/productPage';
 import AdminProtectedRoute from './pages/admin/adminProtectedRouted';
+
 
 const router = createBrowserRouter(createRoutesFromElements(
     <>
@@ -31,7 +35,6 @@ const router = createBrowserRouter(createRoutesFromElements(
         <Route path="about" element={<AboutPage />} />
         <Route path="partners" element={<PartnersPage />} />
         <Route path="login" element={<LoginPage />} />
-        <Route path="foodDelivery" element={<FoodDelivery />} />
         <Route path="signup" element={<Signup />} />
     </Route>
     <Route path="/admin" element={<AdminLoginPage />} />
@@ -49,7 +52,11 @@ const router = createBrowserRouter(createRoutesFromElements(
     
     <Route path="/cartalog" element={<CartalogPage />}/>
     <Route path="/preview" element={<PreviewPage />} />
+    <Route path="/instamart" element={<InstamartPage />} />
     <Route path="/cart" element={<CartPage />} />
+    <Route path="/order" element={<OrderPage />} />
+    <Route path="/dineout" element={<DineoutPage />} />
+    <Route path="/products" element={<ProductPage />} />
     </>
 ));
 

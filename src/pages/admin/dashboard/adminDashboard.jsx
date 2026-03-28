@@ -1,4 +1,48 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
+
 const AdminDashboard = () => {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalOrders: 0,
+    totalSales: 0,
+    recentTransactions: [],
+    salesBreakdown: [
+      { name: "Cloud Kitchens", pct: "42%", w: "w-[42%]", color: "bg-[#FF5200]", textColor: "text-[#FF5200]" },
+      { name: "Premium Dining", pct: "35%", w: "w-[35%]", color: "bg-purple-500", textColor: "text-purple-500" },
+      { name: "Instamart Hubs", pct: "23%", w: "w-[23%]", color: "bg-blue-500", textColor: "text-blue-500" },
+    ]
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem("token") || "";
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/dashboard-stats`, {
+          headers: { "Authorization": token }
+        });
+        if (response.data.success) {
+          setStats(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF5200]"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-4 md:px-8 py-6 md:py-8 space-y-8 md:space-y-12">
       {/* Page Title */}
@@ -10,12 +54,12 @@ const AdminDashboard = () => {
         <div className="sm:col-span-2 bg-[#FF5200] rounded-xl p-6 text-white flex flex-col justify-between relative overflow-hidden shadow-xl shadow-[#FF5200]/10 min-h-[140px]">
           <div className="relative z-10">
             <p className="text-sm font-bold opacity-80 uppercase tracking-tight">Total Active Users</p>
-            <h3 className="text-4xl font-extrabold mt-2 tracking-tight">24,812</h3>
+            <h3 className="text-4xl font-extrabold mt-2 tracking-tight">{stats.totalUsers.toLocaleString()}</h3>
             <p className="text-xs mt-4 flex items-center gap-1 font-semibold">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
               </svg>
-              +12% from last month
+              Updated from database
             </p>
           </div>
           <div className="absolute -right-4 -bottom-4 opacity-10">
@@ -32,8 +76,8 @@ const AdminDashboard = () => {
             </svg>
           </div>
           <div>
-            <p className="text-xs text-gray-500 font-bold uppercase">Avg. Orders / User</p>
-            <h3 className="text-2xl font-bold text-gray-900">8.4</h3>
+            <p className="text-xs text-gray-500 font-bold uppercase">Total Orders</p>
+            <h3 className="text-2xl font-bold text-gray-900">{stats.totalOrders.toLocaleString()}</h3>
           </div>
         </div>
         {/* Stat card 3 */}
@@ -45,7 +89,7 @@ const AdminDashboard = () => {
           </div>
           <div>
             <p className="text-xs text-gray-500 font-bold uppercase">Total Lifetime Sales</p>
-            <h3 className="text-2xl font-bold text-gray-900">$1.2M</h3>
+            <h3 className="text-2xl font-bold text-gray-900">₦{stats.totalSales.toLocaleString()}</h3>
           </div>
         </div>
       </section>
@@ -68,28 +112,27 @@ const AdminDashboard = () => {
           <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
             {/* Mobile card view */}
             <div className="md:hidden divide-y divide-gray-100">
-              {[
-                { name: "Marcus Thompson", id: "#92841", status: "Premium", statusColor: "bg-emerald-100 text-emerald-700", orders: 142, progress: "w-3/4", region: "Bangalore South" },
-                { name: "Elena Rodriguez", id: "#92750", status: "Regular", statusColor: "bg-gray-200 text-gray-600", orders: 48, progress: "w-1/4", region: "Mumbai West" },
-                { name: "Rahul Varma", id: "#92112", status: "Flagged", statusColor: "bg-red-100 text-red-600", orders: 12, progress: "w-[8%]", region: "Delhi NCR" },
-              ].map((user) => (
-                <div key={user.id} className="p-4 space-y-3">
+              {stats.recentTransactions.map((order) => (
+                <div key={order._id} className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-xs">{user.name.split(" ").map(n => n[0]).join("")}</div>
+                      <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-[#FF5200] font-bold text-xs">{order.user?.name?.split(" ").map(n => n[0]).join("") || "U"}</div>
                       <div>
-                        <p className="text-sm font-bold">{user.name}</p>
-                        <p className="text-xs text-gray-400">ID: {user.id}</p>
+                        <p className="text-sm font-bold">{order.user?.name || "Unknown User"}</p>
+                        <p className="text-xs text-gray-400">ID: #{order._id.slice(-5).toUpperCase()}</p>
                       </div>
                     </div>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-extrabold uppercase ${user.statusColor}`}>{user.status}</span>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-extrabold uppercase ${
+                      order.status === "Delivered" ? "bg-emerald-100 text-emerald-700" : 
+                      order.status === "Cancelled" ? "bg-red-100 text-red-600" : "bg-gray-200 text-gray-600"
+                    }`}>{order.status}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">{user.orders} Orders</span>
-                    <span className="text-gray-400">{user.region}</span>
+                    <span className="text-gray-500">₦{order.amountDetails.grandTotal}</span>
+                    <span className="text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span>
                   </div>
                   <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div className={`${user.progress} h-full ${user.status === "Flagged" ? "bg-red-500" : "bg-[#FF5200]"}`}></div>
+                    <div className={`h-full bg-[#FF5200] ${order.status === "Delivered" ? "w-full" : "w-1/2"}`}></div>
                   </div>
                 </div>
               ))}
@@ -101,39 +144,33 @@ const AdminDashboard = () => {
                 <tr className="bg-gray-50">
                   <th className="px-6 py-4 text-[10px] font-extrabold uppercase text-gray-500 tracking-widest">User Profile</th>
                   <th className="px-6 py-4 text-[10px] font-extrabold uppercase text-gray-500 tracking-widest">Status</th>
-                  <th className="px-6 py-4 text-[10px] font-extrabold uppercase text-gray-500 tracking-widest">Order History</th>
-                  <th className="px-6 py-4 text-[10px] font-extrabold uppercase text-gray-500 tracking-widest">Region</th>
+                  <th className="px-6 py-4 text-[10px] font-extrabold uppercase text-gray-500 tracking-widest">Order Amount</th>
+                  <th className="px-6 py-4 text-[10px] font-extrabold uppercase text-gray-500 tracking-widest">Date</th>
                   <th className="px-6 py-4 text-[10px] font-extrabold uppercase text-gray-500 tracking-widest text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {[
-                  { name: "Marcus Thompson", id: "#92841", initials: "MT", bgColor: "bg-orange-100", textColor: "text-[#FF5200]", status: "Premium", statusStyle: "bg-emerald-100 text-emerald-700", orders: 142, progress: "w-3/4", barColor: "bg-[#FF5200]", region: "Bangalore South" },
-                  { name: "Elena Rodriguez", id: "#92750", initials: "ER", bgColor: "bg-blue-100", textColor: "text-blue-600", status: "Regular", statusStyle: "bg-gray-200 text-gray-600", orders: 48, progress: "w-1/4", barColor: "bg-[#FF5200]", region: "Mumbai West" },
-                  { name: "Rahul Varma", id: "#92112", initials: "RV", bgColor: "bg-red-100", textColor: "text-red-600", status: "Flagged", statusStyle: "bg-red-100 text-red-600", orders: 12, progress: "w-[8%]", barColor: "bg-red-500", region: "Delhi NCR" },
-                ].map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50/50 transition-colors group">
+                {stats.recentTransactions.map((order) => (
+                  <tr key={order._id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full ${user.bgColor} flex items-center justify-center ${user.textColor} font-bold text-xs`}>{user.initials}</div>
+                        <div className={`w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-[#FF5200] font-bold text-xs`}>{order.user?.name?.split(" ").map(n => n[0]).join("") || "U"}</div>
                         <div>
-                          <p className="text-sm font-bold">{user.name}</p>
-                          <p className="text-xs text-gray-400">ID: {user.id}</p>
+                          <p className="text-sm font-bold">{order.user?.name || "Unknown User"}</p>
+                          <p className="text-xs text-gray-400">ID: #{order._id.slice(-5).toUpperCase()}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-extrabold uppercase ${user.statusStyle}`}>{user.status}</span>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-extrabold uppercase ${
+                        order.status === "Delivered" ? "bg-emerald-100 text-emerald-700" : 
+                        order.status === "Cancelled" ? "bg-red-100 text-red-600" : "bg-gray-200 text-gray-600"
+                      }`}>{order.status}</span>
                     </td>
-                    <td className="px-6 py-5">
-                      <div className="space-y-1">
-                        <p className="text-sm font-semibold">{user.orders} Orders</p>
-                        <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div className={`${user.progress} h-full ${user.barColor}`}></div>
-                        </div>
-                      </div>
+                    <td className="px-6 py-5 text-sm font-bold text-gray-900 text-nowrap">
+                       ₦{order.amountDetails.grandTotal.toLocaleString()}
                     </td>
-                    <td className="px-6 py-5 text-sm font-medium text-gray-500">{user.region}</td>
+                    <td className="px-6 py-5 text-sm font-medium text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
                     <td className="px-6 py-5 text-right">
                       <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-400">
@@ -148,7 +185,7 @@ const AdminDashboard = () => {
 
             {/* Pagination */}
             <div className="px-6 py-4 bg-gray-50/50 flex items-center justify-between border-t border-gray-100">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Showing 3 of 12,402 users</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Showing {stats.recentTransactions.length} of {stats.totalOrders} items</p>
               <div className="flex gap-2">
                 <button className="p-1.5 rounded bg-white text-gray-400 hover:text-gray-900 transition-colors border border-gray-200">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
@@ -176,11 +213,7 @@ const AdminDashboard = () => {
               <div>
                 <h4 className="text-xs font-extrabold uppercase text-gray-400 mb-4 tracking-widest">By Restaurant Entity</h4>
                 <div className="space-y-4">
-                  {[
-                    { name: "Cloud Kitchens", pct: "42%", w: "w-[42%]", color: "bg-[#FF5200]", textColor: "text-[#FF5200]" },
-                    { name: "Premium Dining", pct: "35%", w: "w-[35%]", color: "bg-purple-500", textColor: "text-purple-500" },
-                    { name: "Instamart Hubs", pct: "23%", w: "w-[23%]", color: "bg-blue-500", textColor: "text-blue-500" },
-                  ].map((item) => (
+                  {stats.salesBreakdown.map((item) => (
                     <div key={item.name} className="flex items-center gap-4">
                       <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-500">

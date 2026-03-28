@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import redLogo from "../assets/images/red-logo.png";
+import axios from "axios";
+import { logout } from "../utilitis/authServices";
 
 const initialItems = [
   { id: 1, name: "Paneer Butter Masala", note: "Standard Prep", price: 249, qty: 1, veg: true },
@@ -8,11 +10,34 @@ const initialItems = [
 ];
 
 export default function CartPage() {
-  const [items, setItems] = useState(initialItems);
+  const navigate = useNavigate();
+  const [items, setItems] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState("home");
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+    let localCart = JSON.parse(localStorage.getItem('food_cart')) || [];
+    localCart = localCart.filter(i => i && i.id != null && !Number.isNaN(Number(i.price)));
+    localStorage.setItem('food_cart', JSON.stringify(localCart));
+    setItems(localCart);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setUser(null);
+    navigate("/login");
+  };
 
   const updateQty = (id, delta) => {
-    setItems((prev) => prev.map((i) => i.id === id ? { ...i, qty: Math.max(0, i.qty + delta) } : i).filter((i) => i.qty > 0));
+    setItems((prev) => {
+        const newItems = prev.map((i) => i.id === id ? { ...i, qty: Math.max(0, i.qty + delta) } : i).filter((i) => i.qty > 0);
+        localStorage.setItem('food_cart', JSON.stringify(newItems));
+        return newItems;
+    });
   };
 
   const itemTotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
@@ -21,18 +46,88 @@ export default function CartPage() {
   const gst = 28.45;
   const grandTotal = (itemTotal + deliveryFee + platformFee + gst).toFixed(2);
 
+  const handleProceed = async () => {
+    if (!user) {
+      alert("Please log in to place an order");
+      navigate("/login");
+      return;
+    }
+    if (items.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem("token");
+      
+      const payload = {
+        items: items,
+        amountDetails: {
+          itemTotal,
+          deliveryFee,
+          platformFee,
+          gst,
+          grandTotal: parseFloat(grandTotal)
+        }
+      };
+
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/create-order`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data.success) {
+        const orderDetails = {
+          orderId: response.data.orderId,
+          date: new Date().toLocaleString(),
+          items: items,
+          itemTotal,
+          deliveryFee,
+          platformFee,
+          gst,
+          grandTotal,
+          customer: user
+        };
+        
+        // Clear cart upon successful order
+        localStorage.removeItem('food_cart');
+        
+        // Navigate straight to the receipt page passing state
+        navigate("/order", { state: { order: orderDetails } });
+      } else {
+        alert("Failed to place order.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error placing order. Please try again.");
+    }
+  };
+
   return (
     <div className="bg-[#f6f6f6] font-[Manrope,sans-serif] text-[#2d2f2f] min-h-screen">
       {/* Navbar */}
       <nav className="bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-[0_24px_24px_-12px_rgba(0,0,0,0.06)]">
         <div className="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
-          <Link index to="/">
+          <Link to="/">
             <img src={redLogo} className="h-10 md:h-15 object-contain" alt="logo" />
           </Link>
           <div className="hidden md:flex items-center gap-8">
-            {["Offers", "Help", "Sign In"].map((item) => (
+            {["Offers", "Help"].map((item) => (
               <span key={item} className="text-slate-600 font-medium hover:text-orange-500 transition-colors cursor-pointer">{item}</span>
             ))}
+            {user ? (
+              <>
+                <span className="text-sm font-bold text-zinc-700 bg-zinc-100 px-4 py-2 rounded-full hidden sm:block">
+                  Hi, {user.name.split(' ')[0]}
+                </span>
+                <button onClick={handleLogout} className="text-sm font-bold text-[#FF5200] bg-orange-50 hover:bg-orange-100 transition-colors px-5 py-2 rounded-full shadow-sm">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <span onClick={() => navigate("/login")} className="text-slate-600 font-medium hover:text-orange-500 transition-colors cursor-pointer">Sign In</span>
+            )}
             <div className="flex items-center gap-2 text-orange-600 font-bold border-b-2 border-orange-500 cursor-pointer">
               <span className="material-symbols-outlined">shopping_cart</span>
             </div>
@@ -57,9 +152,17 @@ export default function CartPage() {
               <div className="w-full">
                 <div className="flex justify-between items-center mb-1">
                   <h2 className="font-[Plus_Jakarta_Sans,sans-serif] text-xl font-bold">Account</h2>
-                  <span className="text-[#934600] font-bold text-sm tracking-wide uppercase cursor-pointer hover:underline">Change</span>
+                  <span onClick={() => !user ? navigate("/login") : null} className="text-[#934600] font-bold text-sm tracking-wide uppercase cursor-pointer hover:underline">
+                    {user ? "Change" : "Login"}
+                  </span>
                 </div>
-                <p className="text-[#5a5c5c] font-medium">Logged in as <span className="text-[#2d2f2f] font-bold">Arjun Sharma</span> • +91 98765 43210</p>
+                <p className="text-[#5a5c5c] font-medium">
+                  {user ? (
+                    <>Logged in as <span className="text-[#2d2f2f] font-bold">{user.name}</span> • {user.email}</>
+                  ) : (
+                    <>Please <span className="text-[#934600] font-bold cursor-pointer hover:underline" onClick={() => navigate("/login")}>log in</span> to place an order.</>
+                  )}
+                </p>
               </div>
             </div>
 
@@ -112,14 +215,14 @@ export default function CartPage() {
           <div className="lg:col-span-4 sticky top-28">
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               {/* Restaurant Header */}
-              <div className="p-6 border-b border-[#e1e3e3] flex items-center gap-4">
+              {/* <div className="p-6 border-b border-[#e1e3e3] flex items-center gap-4">
                 <img alt="Restaurant" className="w-12 h-12 rounded-lg object-cover"
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMaVL4Ufr8GRdPMVG89hDTcsKcDtAV7uDr-woPZW290kQaJ5FU0qKLJsJXxoG9K2MX9vtS_gqrsPqcX49KsRRV2H3BHgEmOPLy-QGtRyspFqa5YeAYSoOpC_RJhjTZZxg3oGU0yAWfYudOzYH6vSddcRR_AyEfcfg07UpbubAm1Mm_mzan8QNQKw_Wbu9q29G-Y_FnKaVNBaXFtEanUa6tzjkLWJnpWJkDx18Skl6OhPnKOtt2SN_JbuSuLNa98pnU6ZrPo2gIjco" />
                 <div>
                   <h3 className="font-[Plus_Jakarta_Sans,sans-serif] font-bold text-lg leading-tight">Royal Indian Kitchen</h3>
                   <p className="text-[#5a5c5c] text-xs font-medium">Indiranagar • 4.5 km</p>
                 </div>
-              </div>
+              </div> */}
 
               {/* Cart Items */}
               <div className="p-6 space-y-6">
@@ -138,7 +241,7 @@ export default function CartPage() {
                         <span className="text-xs font-bold text-[#934600] min-w-[12px] text-center">{item.qty}</span>
                         <span className="material-symbols-outlined text-xs cursor-pointer hover:text-[#934600] transition-colors select-none" onClick={() => updateQty(item.id, 1)}>add</span>
                       </div>
-                      <span className="font-bold text-sm w-14 text-right">₹{item.price * item.qty}</span>
+                      <span className="font-bold text-sm w-14 text-right">₦{item.price * item.qty}</span>
                     </div>
                   </div>
                 ))}
@@ -156,8 +259,8 @@ export default function CartPage() {
                 <div className="mt-6 space-y-3">
                   <p className="font-[Plus_Jakarta_Sans,sans-serif] font-bold text-sm text-[#5a5c5c] uppercase tracking-wider">Bill Details</p>
                   {[
-                    { label: "Item Total", value: `₹${itemTotal}` },
-                    { label: "Delivery Fee | 4.5 kms", value: `₹${deliveryFee}` },
+                    { label: "Item Total", value: `₦${itemTotal}` },
+                    { label: "Delivery Fee | 4.5 kms", value: `₦${deliveryFee}` },
                   ].map((row) => (
                     <div key={row.label} className="flex justify-between text-sm text-[#5a5c5c]">
                       <span>{row.label}</span><span>{row.value}</span>
@@ -168,8 +271,8 @@ export default function CartPage() {
                     <span className="text-[#934600] font-bold cursor-pointer">Add Tip</span>
                   </div>
                   {[
-                    { label: "Platform Fee", value: `₹${platformFee}` },
-                    { label: "GST and Restaurant Charges", value: `₹${gst}` },
+                    { label: "Platform Fee", value: `₦${platformFee}` },
+                    { label: "GST and Restaurant Charges", value: `₦${gst}` },
                   ].map((row) => (
                     <div key={row.label} className="flex justify-between text-sm text-[#5a5c5c]">
                       <span>{row.label}</span><span>{row.value}</span>
@@ -182,9 +285,9 @@ export default function CartPage() {
               <div className="bg-[#e1e3e3] p-6 flex justify-between items-center">
                 <div>
                   <p className="text-xs font-bold text-[#5a5c5c] uppercase tracking-widest">To Pay</p>
-                  <p className="text-xl font-black text-[#2d2f2f] font-[Plus_Jakarta_Sans,sans-serif]">₹{grandTotal}</p>
+                  <p className="text-xl font-black text-[#2d2f2f] font-[Plus_Jakarta_Sans,sans-serif]">₦{grandTotal}</p>
                 </div>
-                <button className="bg-[#934600] text-[#fff0e8] px-8 py-3 rounded-xl font-bold font-[Plus_Jakarta_Sans,sans-serif] shadow-lg hover:bg-[#813c00] transition-colors active:scale-95">
+                <button onClick={handleProceed} className="bg-[#934600] text-[#fff0e8] px-8 py-3 rounded-xl font-bold font-[Plus_Jakarta_Sans,sans-serif] shadow-lg hover:bg-[#813c00] transition-colors active:scale-95">
                   PROCEED
                 </button>
               </div>

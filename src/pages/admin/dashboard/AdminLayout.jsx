@@ -31,6 +31,14 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
+  const admin = JSON.parse(localStorage.getItem("admin")) || { name: "Admin" };
+  const initials = admin.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
   return (
     <div className="bg-gray-50 text-gray-900 flex min-h-screen">
       {/* Mobile Overlay */}
@@ -128,11 +136,16 @@ const AdminLayout = () => {
             </button>
             <div className="hidden md:block h-8 w-[1px] bg-gray-200 mx-1"></div>
             <div className="flex items-center gap-2 hover:bg-gray-100 p-1.5 rounded-full cursor-pointer transition-colors pr-3">
-              <div className="w-8 h-8 rounded-full bg-[#FF5200] flex items-center justify-center text-white font-bold text-xs">AR</div>
-              <span className="text-sm font-semibold text-gray-900 hidden md:inline">Alex Rivera</span>
+              <div className="w-8 h-8 rounded-full bg-[#FF5200] flex items-center justify-center text-white font-bold text-xs">
+                {initials}
+              </div>
+              <span className="text-sm font-semibold text-gray-900 hidden md:inline">
+                {admin.name}
+              </span>
             </div>
           </div>
         </header>
+
 
         {/* Child Route Content */}
         <Outlet />

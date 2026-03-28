@@ -12,33 +12,40 @@ export default function CatalogPage() {
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const itemsPerPage = 8;
+
+  const fetchProducts = async (page = currentPage) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/get-all-products?page=${page}&limit=${itemsPerPage}`);
+      if (response.data.success) {
+        setProducts(response.data.data);
+        setTotalProducts(response.data.total);
+      }
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/get-all-products`);
-        if (response.data.success) {
-          setProducts(response.data.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
+    fetchProducts(currentPage);
     
     const userData = localStorage.getItem("user");
     if (userData) {
       setUser(JSON.parse(userData));
     }
-  }, []);
+  }, [currentPage]);
 
   const handleLogout = () => {
     logout();
     setUser(null);
-    navigate("/login");
+    navigate("/");
   };
+
 
   const toggleFilter = (f) =>
     setActiveFilters((prev) => (prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]));
@@ -114,7 +121,7 @@ export default function CatalogPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
           {products.map((p) => (
-            <div key={p._id} className="group cursor-pointer" onClick={() => navigate("/preview")}>
+            <div key={p._id} className="group cursor-pointer" onClick={() => navigate("/preview", { state: { product: p } })}>
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 shadow-sm">
                 <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
@@ -143,9 +150,70 @@ export default function CatalogPage() {
           </div>
         )}
 
-        <div className="mt-16 text-center">
-          <button className="px-8 py-3 bg-[#e1e3e3] rounded-full font-bold hover:bg-[#d3d5d5] transition-all text-[#5a5c5c] hover:text-[#2d2f2f]">Show more restaurants</button>
-        </div>
+        {/* Pagination */}
+        {totalProducts > itemsPerPage && (
+          <div className="mt-16 flex flex-col items-center gap-6">
+            <div className="flex items-center gap-2">
+              <button 
+                disabled={currentPage === 1}
+                onClick={() => {
+                  setCurrentPage(prev => Math.max(1, prev - 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="w-12 h-12 rounded-2xl bg-white border border-[#acadad]/20 flex items-center justify-center text-slate-400 hover:text-[#fa7e17] disabled:opacity-30 disabled:hover:text-slate-400 transition-all shadow-sm hover:shadow-md"
+              >
+                <span className="material-symbols-outlined font-bold">chevron_left</span>
+              </button>
+              
+              <div className="flex gap-2">
+                {Array.from({ length: Math.ceil(totalProducts / itemsPerPage) }, (_, i) => i + 1)
+                  .filter(page => {
+                    return page === 1 || page === Math.ceil(totalProducts / itemsPerPage) || Math.abs(page - currentPage) <= 1;
+                  })
+                  .map((page, index, array) => {
+                    const elements = [];
+                    if (index > 0 && page - array[index - 1] > 1) {
+                      elements.push(<span key={`ellipsis-${page}`} className="w-10 h-10 flex items-center justify-center text-slate-400">...</span>);
+                    }
+                    elements.push(
+                      <button
+                        key={page}
+                        onClick={() => {
+                          setCurrentPage(page);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className={`w-12 h-12 rounded-2xl font-black text-sm transition-all shadow-sm ${
+                          currentPage === page
+                            ? "bg-[#fa7e17] text-white shadow-[#fa7e17]/30 scale-110"
+                            : "bg-white text-zinc-600 hover:bg-orange-50 hover:text-[#fa7e17] border border-[#acadad]/10"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                    return elements;
+                  })
+                }
+              </div>
+
+              <button 
+                disabled={currentPage >= Math.ceil(totalProducts / itemsPerPage)}
+                onClick={() => {
+                  setCurrentPage(prev => Math.min(Math.ceil(totalProducts / itemsPerPage), prev + 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="w-12 h-12 rounded-2xl bg-white border border-[#acadad]/20 flex items-center justify-center text-slate-400 hover:text-[#fa7e17] disabled:opacity-30 disabled:hover:text-slate-400 transition-all shadow-sm hover:shadow-md"
+              >
+                <span className="material-symbols-outlined font-bold">chevron_right</span>
+              </button>
+            </div>
+            
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              Showing page {currentPage} of {Math.ceil(totalProducts / itemsPerPage)} ({totalProducts} items total)
+            </p>
+          </div>
+        )}
+
       </main>
 
       <footer className="w-full pt-16 pb-8 bg-zinc-100 border-t border-zinc-200/50">

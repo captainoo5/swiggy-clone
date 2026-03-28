@@ -19,14 +19,19 @@ const AdminFoodManagement = () => {
   const [editFormData, setEditFormData] = useState({});
   const [editImageFile, setEditImageFile] = useState(null);
   const [editImagePreview, setEditImagePreview] = useState(null);
-  const fetchProducts = async () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const itemsPerPage = 6;
+
+  const fetchProducts = async (page = currentPage) => {
     try {
       const token = localStorage.getItem("token") || "";
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/get-all-products`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/get-all-products?page=${page}&limit=${itemsPerPage}`, {
         headers: { "Authorization": token }
       });
       if (response.data.success) {
         setFoodItems(response.data.data);
+        setTotalProducts(response.data.total);
       }
     } catch (error) {
       console.error(error);
@@ -35,8 +40,9 @@ const AdminFoodManagement = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    fetchProducts(currentPage);
+  }, [currentPage]);
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -299,31 +305,59 @@ const AdminFoodManagement = () => {
         <div className="flex gap-8">
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Items</p>
-            <p className="text-xl font-black text-gray-900">1,248</p>
+            <p className="text-xl font-black text-gray-900">{totalProducts.toLocaleString()}</p>
           </div>
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Now</p>
-            <p className="text-xl font-black text-green-600">1,102</p>
+            <p className="text-xl font-black text-green-600">{foodItems.filter(i => i.status === 'Active').length}</p>
           </div>
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Out of Stock</p>
-            <p className="text-xl font-black text-red-500">46</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page Items</p>
+            <p className="text-xl font-black text-indigo-500">{foodItems.length}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 hover:text-[#FF5200] transition-colors shadow-sm">
+          <button 
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 hover:text-[#FF5200] disabled:opacity-50 disabled:hover:text-slate-400 transition-colors shadow-sm"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </button>
           <div className="flex gap-1">
-            <button className="w-10 h-10 rounded-xl bg-[#FF5200] text-white font-bold text-sm shadow-md shadow-[#FF5200]/30">1</button>
-            <button className="w-10 h-10 rounded-xl bg-white text-gray-900 font-bold text-sm hover:bg-orange-50 transition-colors">2</button>
-            <button className="w-10 h-10 rounded-xl bg-white text-gray-900 font-bold text-sm hover:bg-orange-50 transition-colors">3</button>
-            <span className="w-10 h-10 flex items-center justify-center text-slate-400">...</span>
-            <button className="w-10 h-10 rounded-xl bg-white text-gray-900 font-bold text-sm hover:bg-orange-50 transition-colors">12</button>
+            {Array.from({ length: Math.ceil(totalProducts / itemsPerPage) }, (_, i) => i + 1)
+              .filter(page => {
+                // Show pages around current page
+                return page === 1 || page === Math.ceil(totalProducts / itemsPerPage) || Math.abs(page - currentPage) <= 1;
+              })
+              .map((page, index, array) => {
+                const elements = [];
+                if (index > 0 && page - array[index - 1] > 1) {
+                  elements.push(<span key={`ellipsis-${page}`} className="w-10 h-10 flex items-center justify-center text-slate-400">...</span>);
+                }
+                elements.push(
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded-xl font-bold text-sm transition-all ${
+                      currentPage === page
+                        ? "bg-[#FF5200] text-white shadow-md shadow-[#FF5200]/30"
+                        : "bg-white text-gray-900 hover:bg-orange-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+                return elements;
+              })}
           </div>
-          <button className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 hover:text-[#FF5200] transition-colors shadow-sm">
+          <button 
+            disabled={currentPage >= Math.ceil(totalProducts / itemsPerPage)}
+            onClick={() => setCurrentPage(prev => Math.min(Math.ceil(totalProducts / itemsPerPage), prev + 1))}
+            className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 hover:text-[#FF5200] disabled:opacity-50 disabled:hover:text-slate-400 transition-colors shadow-sm"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
@@ -424,7 +458,7 @@ const AdminFoodManagement = () => {
               {/* Price & Location */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Price (₹)</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Price (₦)</label>
                   <input type="number" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} placeholder="249.00" className="w-full bg-gray-100 border-none rounded-xl py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#FF5200]/20 focus:outline-none transition-all font-medium text-sm" />
                 </div>
                 <div>
